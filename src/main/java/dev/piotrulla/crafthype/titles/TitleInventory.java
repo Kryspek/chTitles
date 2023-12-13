@@ -35,24 +35,27 @@ public class TitleInventory {
             boolean hasPrice = this.moneyResolver.has(player, style.getPrice());
 
             ItemBuilder styledItem = ItemBuilder.from(Material.OAK_SIGN)
-                    .name(this.miniMessage.deserialize("<" +style.getTextColor()+"> "+style.getName()))
-                    .lore(
-                            this.miniMessage.deserialize("<dark_gray> Tytuły"),
+                    .name(this.miniMessage.deserialize("<" +style.getTextColor()+"> "+style.getName() + style.getTextColorEnd()))
+                    .lore(this.miniMessage.deserialize("<dark_gray> Tytuły"),
                             this.miniMessage.deserialize(""),
                             this.miniMessage.deserialize("<gold> Cena: "+ style.getPrice() + "zl"),
                             this.miniMessage.deserialize("<dark_gray> Podgląd:"),
-                            this.miniMessage.deserialize("<"+ style.getTextColor()+"> ["+title+"] <gray>"+player.getName()),
+                            this.miniMessage.deserialize("<" + style.getTextColor() + ">" + "[" + title + "]" + style.getTextColorEnd() + " <gray>" + player.getName()),
                             this.miniMessage.deserialize(""),
                             this.miniMessage.deserialize(hasPrice ? "<green>Kliknij aby zakupić!" : "<red>Nie masz wystarczająco kasy!")
                     );
 
             gui.setItem(style.getSlot(), new GuiItem(styledItem.build(), event -> {
+                String userTitle = userDataRepository.find(player.getUniqueId());
+
+                if (userTitle != null && userTitle.equals(title)) {
+                    return;
+                }
+
                 if (!this.moneyResolver.has(player, style.getPrice())) {
                     return;
                 }
                 player.closeInventory();
-
-                String newTitle = "<"+style.getTextColor()+"> [" + title+"]";
 
                 this.userDataRepository.createWithTitle(player.getUniqueId(), newTitle);
 
@@ -63,6 +66,22 @@ public class TitleInventory {
             }));
 
             gui.open(player);
+        }
+    }
+
+    String generateFooter(Player player, double price, String title) {
+        String userTitle = userDataRepository.find(player.getUniqueId());
+
+        if (userTitle != null && userTitle.equals(title)) {
+            return "<red>Posiadasz już ten kolor!";
+        }
+
+        boolean hasMoney = this.moneyResolver.has(player, price);
+        if (hasMoney) {
+            return "<yellow>Kliknij, aby zakupić!";
+        }
+        else {
+            return "<red>Nie stać cię!";
         }
     }
 }

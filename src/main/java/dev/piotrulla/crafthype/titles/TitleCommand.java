@@ -27,7 +27,7 @@ public class TitleCommand implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            player.sendMessage(legacySection().serialize(this.miniMessage.deserialize("<gold>Poprawne użycie: <white>/title <nazwa>")));
+            player.sendMessage(legacySection().serialize(this.miniMessage.deserialize("<red>Użycie: /title <nazwa>")));
             return false;
         }
 

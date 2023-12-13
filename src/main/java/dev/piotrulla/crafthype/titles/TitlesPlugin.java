@@ -1,6 +1,7 @@
 package dev.piotrulla.crafthype.titles;
 
 import dev.piotrulla.crafthype.titles.bridge.BridgeService;
+import dev.piotrulla.crafthype.titles.command.RemoveCommand;
 import dev.piotrulla.crafthype.titles.config.ConfigService;
 import dev.piotrulla.crafthype.titles.config.implementation.UserDataConfig;
 import dev.piotrulla.crafthype.titles.config.implementation.UserDataRepository;
@@ -38,6 +39,7 @@ public class TitlesPlugin extends JavaPlugin {
         new TitlePlaceholder(this.userRepository, miniMessage).register();
 
         this.getCommand("title").setExecutor(new TitleCommand(this.titleInventory, miniMessage));
+        this.getCommand("titleadmin").setExecutor(new RemoveCommand(miniMessage,this.userRepository));
     }
 
     @Override

@@ -76,6 +76,12 @@ bukkit {
             aliases = listOf("tytul", "tytuł")
         }
     }
+
+    commands {
+        register("titleadmin") {
+            description = "Remove title"
+        }
+    }
 }
 
 tasks.compileJava {

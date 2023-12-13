@@ -29,7 +29,7 @@ public class UserDataRepository {
         return title;
     }
 
-    Map<UUID, String> removeUser(UUID uniqueId) {
+    public Map<UUID, String> removeUser(UUID uniqueId) {
         Map<UUID, String> users = new ConcurrentHashMap<>(this.dataConfig.titlesByUuids);
 
         users.remove(uniqueId);
