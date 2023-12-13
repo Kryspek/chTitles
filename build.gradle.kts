@@ -40,6 +40,9 @@ dependencies {
     implementation("com.zaxxer:HikariCP:5.0.1")
     implementation("com.j256.ormlite:ormlite-jdbc:6.1")
 
+    // LuckPerms
+    compileOnly("net.luckperms:api:5.4")
+
     // inventory framework
     implementation("dev.triumphteam:triumph-gui:3.1.7")
 
@@ -67,7 +70,7 @@ bukkit {
     prefix = "chTitles"
     author = "Piotrulla"
     name = "chTitles"
-    depend = listOf("Vault", "PlaceholderAPI")
+    depend = listOf("Vault", "PlaceholderAPI", "LuckPerms")
     version = "${project.version}"
 
     commands {

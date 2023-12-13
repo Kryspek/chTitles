@@ -13,17 +13,17 @@ public class VaultMoneyResolver implements MoneyResolver {
     }
 
     @Override
-    public boolean has(OfflinePlayer player, double amount) {
+    public boolean has(OfflinePlayer player, int amount) {
         return this.economy.has(player, amount);
     }
 
     @Override
-    public void deposit(OfflinePlayer player, double amount) {
+    public void deposit(OfflinePlayer player, int amount) {
         this.economy.depositPlayer(player, amount);
     }
 
     @Override
-    public void withdrawl(OfflinePlayer player, double amount) {
+    public void withdrawl(OfflinePlayer player, int amount) {
         this.economy.withdrawPlayer(player, amount);
     }
 }
