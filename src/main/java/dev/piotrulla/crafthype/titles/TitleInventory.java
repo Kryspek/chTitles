@@ -6,6 +6,8 @@ import dev.piotrulla.crafthype.titles.style.TitleStyle;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -13,6 +15,10 @@ import org.bukkit.entity.Player;
 import static net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection;
 
 public class TitleInventory {
+
+    private final static Component RESET_ITEM = Component.text()
+            .decoration(TextDecoration.ITALIC, false)
+            .build();
 
     private final UserDataRepository userDataRepository;
     private final MoneyResolver moneyResolver;
@@ -27,28 +33,28 @@ public class TitleInventory {
     public void openInventory(Player player, String title) {
         Gui gui = Gui.gui()
                 .rows(5)
-                .title(this.miniMessage.deserialize("Wybierz kolor dla tytułu " + title + "?"))
+                .title(this.resolveMiniMessage("Wybierz kolor dla tytułu " + title + "?"))
                 .disableAllInteractions()
                 .create();
 
         for (TitleStyle style : TitleStyle.values()) {
-            boolean hasPrice = this.moneyResolver.has(player, style.getPrice());
+            String newTitle = "<"+style.getTextColor()+"> [" + title+"]";
 
             ItemBuilder styledItem = ItemBuilder.from(Material.OAK_SIGN)
-                    .name(this.miniMessage.deserialize("<" +style.getTextColor()+"> "+style.getName() + style.getTextColorEnd()))
-                    .lore(this.miniMessage.deserialize("<dark_gray> Tytuły"),
-                            this.miniMessage.deserialize(""),
-                            this.miniMessage.deserialize("<gold> Cena: "+ style.getPrice() + "zl"),
-                            this.miniMessage.deserialize("<dark_gray> Podgląd:"),
-                            this.miniMessage.deserialize("<" + style.getTextColor() + ">" + "[" + title + "]" + style.getTextColorEnd() + " <gray>" + player.getName()),
-                            this.miniMessage.deserialize(""),
-                            this.miniMessage.deserialize(hasPrice ? "<green>Kliknij aby zakupić!" : "<red>Nie masz wystarczająco kasy!")
+                    .name(this.resolveMiniMessage("<" +style.getTextColor()+"> "+style.getName() + style.getTextColorEnd()))
+                    .lore(this.resolveMiniMessage("<dark_gray> Tytuły"),
+                            this.resolveMiniMessage(""),
+                            this.resolveMiniMessage("<gold> Cena: "+ style.getPrice() + "zl"),
+                            this.resolveMiniMessage("<dark_gray> Podgląd:"),
+                            this.resolveMiniMessage("<" + style.getTextColor() + ">" + "[" + title + "]" + style.getTextColorEnd() + " <gray>" + player.getName()),
+                            this.resolveMiniMessage(""),
+                            this.resolveMiniMessage(this.generateFooter(player, style.getPrice(), newTitle))
                     );
 
             gui.setItem(style.getSlot(), new GuiItem(styledItem.build(), event -> {
                 String userTitle = userDataRepository.find(player.getUniqueId());
 
-                if (userTitle != null && userTitle.equals(title)) {
+                if (userTitle != null && userTitle.equals(newTitle)) {
                     return;
                 }
 
@@ -61,7 +67,7 @@ public class TitleInventory {
 
                 this.moneyResolver.withdrawl(player, style.getPrice());
                 player.sendMessage(legacySection().serialize(
-                        this.miniMessage.deserialize("<gray>Pomyślnie zakupiono tytuł <"+style.getTextColor()+"> "+ title))
+                        this.resolveMiniMessage("<gray>Pomyślnie zakupiono tytuł <"+style.getTextColor()+"> "+ title))
                 );
             }));
 
@@ -83,5 +89,9 @@ public class TitleInventory {
         else {
             return "<red>Nie stać cię!";
         }
+    }
+
+    Component resolveMiniMessage(String text) {
+        return RESET_ITEM.append(this.miniMessage.deserialize(text));
     }
 }

@@ -32,7 +32,6 @@ public class TitlePlaceholder extends PlaceholderExpansion {
         return "1.0.0";
     }
 
-
     public String onPlaceholderRequest(final Player player, @NotNull final String params) {
         String title = this.userRepository.find(player.getUniqueId());
 
