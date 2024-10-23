@@ -57,7 +57,7 @@ dependencies {
     implementation("com.j256.ormlite:ormlite-jdbc:6.1")
 
     // placeholders
-    compileOnly("me.clip:placeholderapi:2.11.3")
+    compileOnly("me.clip:placeholderapi:2.11.6")
 }
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -67,9 +67,9 @@ java {
 bukkit {
     main = "dev.piotrulla.crafthype.titles.TitlesPlugin"
     apiVersion = "1.13"
-    prefix = "chTitles"
+    prefix = "gmTitles"
     author = "Piotrulla"
-    name = "chTitles"
+    name = "gmTitles"
     depend = listOf("Vault", "PlaceholderAPI", "LuckPerms")
     version = "${project.version}"
 
@@ -78,45 +78,43 @@ bukkit {
             description = "Choose title"
             aliases = listOf("tytul", "tytuł")
         }
-    }
-
-    commands {
-        register("titleadmin") {
-            description = "Remove title"
+        register("titleshistory") {
+            description = "Show titles history"
+            aliases = listOf("tytulyhistoria", "tytułehistoria")
         }
     }
-}
 
-tasks.compileJava {
-    options.compilerArgs = listOf("-Xlint:deprecation", "-parameters")
-    options.encoding = "UTF-8"
-    options.javaModuleVersion.set("11")
-}
+    tasks.compileJava {
+        options.compilerArgs = listOf("-Xlint:deprecation", "-parameters")
+        options.encoding = "UTF-8"
+        options.javaModuleVersion.set("11")
+    }
 
-tasks {
-    runServer {
-        minecraftVersion("1.20")
+    tasks {
+        runServer {
+            minecraftVersion("1.20")
 
-        downloadPlugins {
-            hangar("PlaceholderAPI", "2.11.5")
-            github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
-            url("https://github.com/akrentz6/Economy/releases/download/2.3/Economy.jar")
+            downloadPlugins {
+                hangar("PlaceholderAPI", "2.11.5")
+                github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
+                url("https://github.com/akrentz6/Economy/releases/download/2.3/Economy.jar")
+            }
         }
     }
-}
 
-tasks.withType<ShadowJar> {
-    archiveFileName.set("chTitles v${project.version}.jar")
+    tasks.withType<ShadowJar> {
+        archiveFileName.set("gmTitles v${project.version}.jar")
 
-    val prefix = "dev.piotrulla.crafthype.titles.libs"
+        val prefix = "dev.piotrulla.crafthype.titles.libs"
 
-    listOf(
-        "org.bstats",
-        "net.kyori",
-        "com.j256",
-        "dev.triumphteam",
-        "com.github.ben-manes",
-    ).forEach { pack ->
-        relocate(pack, "$prefix.$pack")
+        listOf(
+            "org.bstats",
+            "net.kyori",
+            "com.j256",
+            "dev.triumphteam",
+            "com.github.ben-manes",
+        ).forEach { pack ->
+            relocate(pack, "$prefix.$pack")
+        }
     }
 }

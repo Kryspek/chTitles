@@ -1,7 +1,6 @@
 package dev.piotrulla.crafthype.titles;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -31,7 +30,7 @@ public class TitleCommand implements CommandExecutor {
             return false;
         }
 
-        String title = args[0];
+        String title = args[0].toUpperCase();
 
         if (title.length() > 6) {
             player.sendMessage(legacySection().serialize(this.miniMessage.deserialize("<red>Tytuł nie może być dłuższy niż 6 znaków!")));

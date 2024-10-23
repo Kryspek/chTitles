@@ -2,6 +2,7 @@ package dev.piotrulla.crafthype.titles;
 
 import dev.piotrulla.crafthype.titles.bridge.MoneyResolver;
 import dev.piotrulla.crafthype.titles.config.implementation.UserDataRepository;
+import dev.piotrulla.crafthype.titles.notification.NotificationAnnouncer;
 import dev.piotrulla.crafthype.titles.style.TitleStyle;
 import dev.triumphteam.gui.builder.item.ItemBuilder;
 import dev.triumphteam.gui.guis.Gui;
@@ -14,7 +15,7 @@ import net.luckperms.api.cacheddata.CachedMetaData;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-import static net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection;
+import java.util.List;
 
 public class TitleInventory {
 
@@ -26,12 +27,14 @@ public class TitleInventory {
     private final MoneyResolver moneyResolver;
     private final MiniMessage miniMessage;
     private final LuckPerms luckPerms;
+    private final NotificationAnnouncer notificationAnnouncer;
 
-    public TitleInventory(UserDataRepository userDataRepository, MoneyResolver moneyResolver, MiniMessage miniMessage, LuckPerms luckPerms) {
+    public TitleInventory(UserDataRepository userDataRepository, MoneyResolver moneyResolver, MiniMessage miniMessage, LuckPerms luckPerms, NotificationAnnouncer notificationAnnouncer) {
         this.userDataRepository = userDataRepository;
         this.moneyResolver = moneyResolver;
         this.miniMessage = miniMessage;
         this.luckPerms = luckPerms;
+        this.notificationAnnouncer = notificationAnnouncer;
     }
 
     public void openInventory(Player player, String title) {
@@ -53,15 +56,21 @@ public class TitleInventory {
                             this.resolveMiniMessage(""),
                             this.resolveMiniMessage("<white>Cena: <yellow>"+ style.getPrice()),
                             this.resolveMiniMessage("<white>Podgląd:"),
-                            this.resolveMiniMessage(style.getTextColor() + "[" + title + "]" + style.getTextColorEnd() + " " + primaryGroup + " " + player.getName()),
+                            this.resolveMiniMessage(style.getTextColor() + "[" + title + "]" + style.getTextColorEnd()
+                                    + " " + primaryGroup + " " + player.getName()),
                             this.resolveMiniMessage(""),
                             this.resolveMiniMessage(this.generateFooter(player, style.getPrice(), newTitle))
                     );
 
             gui.setItem(style.getSlot(), new GuiItem(styledItem.build(), event -> {
-                String userTitle = userDataRepository.find(player.getUniqueId());
+                List<String> userTitle = userDataRepository.findPurchasedColors(player.getUniqueId());
 
-                if (userTitle != null && userTitle.equals(newTitle)) {
+                if (userTitle != null && userTitle.contains(newTitle)) {
+                    this.userDataRepository.createWithTitle(player.getUniqueId(), newTitle);
+                    player.closeInventory();
+                    this.notificationAnnouncer.sendMessage(player,
+                            "<gradient:dark_red:red:gold:yellow:green:aqua><b>Tytuł</b></gradient> <dark_gray>➤</dark_gray>" +
+                                    " <white>Pomyślnie ustawiono tytuł " + style.getTextColor() + "[" + title + "]");
                     return;
                 }
 
@@ -73,9 +82,9 @@ public class TitleInventory {
                 this.userDataRepository.createWithTitle(player.getUniqueId(), newTitle);
 
                 this.moneyResolver.withdrawl(player, style.getPrice());
-                player.sendMessage(legacySection().serialize(
-                        this.resolveMiniMessage("<gray>Pomyślnie zakupiono tytuł <"+style.getTextColor()+"> "+ title))
-                );
+                this.notificationAnnouncer.sendMessage(player,
+                        "<gradient:dark_red:red:gold:yellow:green:aqua><b>Tytuł</b></gradient> <dark_gray>➤</dark_gray>" +
+                                " <white>Pomyślnie zakupiono tytuł " + style.getTextColor() + "[" + title + "]");
             }));
 
             ItemBuilder close = ItemBuilder.from(Material.BARRIER)
@@ -90,15 +99,20 @@ public class TitleInventory {
     }
 
     String generateFooter(Player player, int price, String title) {
-        String userTitle = userDataRepository.find(player.getUniqueId());
+        List<String> userTitle = userDataRepository.findPurchasedColors(player.getUniqueId());
+        String currentColor = userDataRepository.getCurrentColor(player.getUniqueId());
 
-        if (userTitle != null && userTitle.equals(title)) {
-            return "<red>Posiadasz już ten kolor!";
+
+        if (userTitle != null && userTitle.contains(title)) {
+            if (currentColor != null && currentColor.equals(title)) {
+                return "<red>Wybrany!";
+            }
+            return "<white>Kliknij, aby ustawić tytuł!";
         }
 
         boolean hasMoney = this.moneyResolver.has(player, price);
         if (hasMoney) {
-            return "<yellow>Kliknij, aby zakupić!";
+            return "<white>Kliknij, aby zakupić!";
         }
         else {
             return "<red>Nie stać cię!";
@@ -106,6 +120,6 @@ public class TitleInventory {
     }
 
     Component resolveMiniMessage(String text) {
-        return RESET_ITEM.append(this.miniMessage.deserialize(text));
+        return Component.text().decoration(TextDecoration.ITALIC, false).append(this.miniMessage.deserialize(text)).build();
     }
 }

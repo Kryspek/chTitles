@@ -7,6 +7,8 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class TitlePlaceholder extends PlaceholderExpansion {
 
     private final UserDataRepository userRepository;
@@ -19,7 +21,7 @@ public class TitlePlaceholder extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getIdentifier() {
-        return "chTitles";
+        return "gmTitles";
     }
 
     @Override
@@ -33,15 +35,16 @@ public class TitlePlaceholder extends PlaceholderExpansion {
     }
 
     public String onPlaceholderRequest(final Player player, @NotNull final String params) {
-        String title = this.userRepository.find(player.getUniqueId());
+        String currentTitle = this.userRepository.getCurrentColor(player.getUniqueId());
 
-        if (title == null) {
+
+        if (currentTitle == null || currentTitle.isEmpty()) {
             return "";
         }
 
-        // %chTitles_title%
+        // %gmTitles_title%
         if (params.equalsIgnoreCase("title")) {
-            return LegacyComponentSerializer.legacySection().serialize(this.miniMessage.deserialize(title));
+            return LegacyComponentSerializer.legacySection().serialize(this.miniMessage.deserialize(currentTitle));
         }
 
         return "";

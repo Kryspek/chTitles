@@ -5,6 +5,9 @@ import dev.piotrulla.crafthype.titles.config.ConfigService;
 import dev.piotrulla.crafthype.titles.config.implementation.UserDataConfig;
 import dev.piotrulla.crafthype.titles.config.implementation.UserDataRepository;
 import dev.piotrulla.crafthype.titles.legacy.LegacyColorProcessor;
+import dev.piotrulla.crafthype.titles.notification.NotificationAnnouncer;
+import net.kyori.adventure.platform.AudienceProvider;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.LuckPerms;
 import org.bukkit.Server;
@@ -21,7 +24,13 @@ public class TitlesPlugin extends JavaPlugin {
 
     private TitleInventory titleInventory;
 
+    private TitleHistory titleHistory;
+
     private LuckPerms luckPerms;
+    private NotificationAnnouncer notificationAnnouncer;
+
+    private MiniMessage miniMessage;
+    private AudienceProvider audienceProvider;
 
     @Override
     public void onEnable() {
@@ -29,24 +38,29 @@ public class TitlesPlugin extends JavaPlugin {
         this.userDataConfig = this.configService.load(new UserDataConfig());
 
         this.luckPerms = this.getServer().getServicesManager().load(LuckPerms.class);
-
         Server server = this.getServer();
 
-        MiniMessage miniMessage = MiniMessage.builder()
+        this.audienceProvider = BukkitAudiences.create(this);
+        this.miniMessage = MiniMessage.builder()
                 .postProcessor(new LegacyColorProcessor())
                 .build();
+
+        this.notificationAnnouncer = new NotificationAnnouncer(this.audienceProvider, this.miniMessage);
 
         this.bridgeService = new BridgeService(server.getServicesManager(), server.getPluginManager());
         this.bridgeService.init();
 
         this.userRepository = new UserDataRepository(this.configService, this.userDataConfig);
 
-        this.titleInventory = new TitleInventory(this.userRepository, this.bridgeService.getMoneyResolver(), miniMessage, luckPerms);
+        this.titleInventory = new TitleInventory(this.userRepository, this.bridgeService.getMoneyResolver(), miniMessage, luckPerms, notificationAnnouncer);
+
+        this.titleHistory = new TitleHistory(this.userRepository, miniMessage);
 
         new TitlePlaceholder(this.userRepository, miniMessage).register();
 
         this.getCommand("title").setExecutor(new TitleCommand(this.titleInventory, miniMessage));
-        this.getCommand("titleadmin").setExecutor(new TitleRemoveCommand(miniMessage,this.userRepository));
+
+        this.getCommand("titleshistory").setExecutor(new TitleHistoryCommand(this.titleHistory));
     }
 
     @Override
