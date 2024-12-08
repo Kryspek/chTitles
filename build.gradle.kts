@@ -44,7 +44,7 @@ dependencies {
     compileOnly("net.luckperms:api:5.4")
 
     // inventory framework
-    implementation("dev.triumphteam:triumph-gui:3.1.7")
+    implementation("dev.triumphteam:triumph-gui:3.1.11")
 
     // caffeine for ultra fast cache and eliminate google's guava cache bugs.
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
