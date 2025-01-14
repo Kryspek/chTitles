@@ -32,7 +32,7 @@ dependencies {
     implementation("net.kyori:adventure-text-minimessage:4.14.0")
 
     // configs
-    implementation("net.dzikoysk:cdn:1.14.4") {
+    implementation("net.dzikoysk:cdn:1.14.6") {
         exclude(group = "org.jetbrains.kotlin")
     }
 
