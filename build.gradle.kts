@@ -47,7 +47,7 @@ dependencies {
     implementation("dev.triumphteam:triumph-gui:3.1.7")
 
     // caffeine for ultra fast cache and eliminate google's guava cache bugs.
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
 
     // economy provider
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
